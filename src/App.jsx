@@ -1,13 +1,10 @@
-
-import { useState, useEffect } from 'react'
+import style from './App.module.css'
 import { api } from './api/api'
 import { useNavigate } from 'react-router'
-import Style from './App.module.css';
-
-
+import { useState, useEffect } from 'react';
 
 function App() {
-  const navigete = useNavigate();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,9 +15,12 @@ function App() {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       setUser(JSON.parse(storedUser))
-      navigete('/userslist')
+      navigate('/dashboard')
     }
-  }, [navigete])
+  }, [navigate])
+
+
+
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
@@ -28,32 +28,31 @@ function App() {
       const user = response.data
 
       localStorage.setItem('user', JSON.stringify(user))
-      navigete('/usersList')
+      setUser(user)
+      navigate('/dashboard')
     } catch (error) {
-      setMessage('Erro ao fazer login' + (error.response?.data?.message || 'verifique seus dados'))
+      setMessage('Erro no login: ' + (error.response?.data?.message || 'Verifique os dados'))
     }
   }
 
   return (
-    <>
-      <div className={Style.wrapLogin}>
-        <div className={Style.wrapImg}>
-          <div className={Style.wrapDegrade}>
+    <div className={style.wrapLogin}>
 
-          </div>
-        </div>
-        <div className={Style.wrapForm}>
-          <form onSubmit={handleLogin}>
-            <h2>Login</h2>
-            <input type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input type="password" placeholder='Senha' value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <button type="submit">Entrar</button>
-            <p>{message}</p>
-          </form>
-        </div>
+      <div className={style.wrapImg}>
+        <div className={style.degrade}></div>
+      </div>
+      <div className={style.wrapForm}>
+        <form onSubmit={handleLogin}>
+          <h2>Login</h2>
+          <input type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="password" placeholder='Senha' value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <button type='submit'>Entrar</button>
+          <p className={style.userCad}>Entre em contato</p>
+          <p>{message}</p>
+        </form>
       </div>
 
-    </>
+    </div>
   )
 }
 
