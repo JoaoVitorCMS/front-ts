@@ -3,14 +3,24 @@ import './usersList.module.css'
 import { useEffect, useState } from 'react'
 import { api } from './api/api'
 import { Menu } from './components/menu'
+import { useNavigate } from 'react-router'
 
 function UsersList() {
+  const navigete = useNavigate()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editUserId, setEditUserId] = useState(null)
+  const [editData, setEditData] = useState({name: '',password: ''})
 
   useEffect(() => {
-    async function fetchUsers(){
+    const storedUser =  localStorage.getItem('user')
+    if(!storedUser) navigete('/')
+         
+  }, [navigete])
+  
+  
+  const fetchUsers = async () => {
       try {
         const response = await api.get('/users')
         setUsers(response.data)
@@ -21,9 +31,40 @@ function UsersList() {
         setLoading(false)
       }
     }
+    useEffect(() => {
     fetchUsers()
+
   }, [])
   
+  const handleDelete = async (id) =>{
+    try{
+      await api.delete(`/users/${id}`)
+      setUsers(users.filter((unity) => unity.id !== id))
+    }catch(err){
+      setError("Erro ao deletar usuario",err)
+    
+    }
+  }
+
+  const handleEditClick = (user) => {
+    setEditUserId(user.id)
+    setEditData({name: user.name, email: user.email, password: ''}) //não mostra senha antiga
+  }
+
+  const handlEditChange = (e) =>{
+      const {name,value} = e.target
+      setEditData({...editData, [name]: value})
+  }
+  
+  const handleUpdate = async (e) => {
+    e.preventDefault()
+    try{
+      await api.put(`/users/${editUserId}`, editData)
+      setEditData(null)
+    }catch (err){
+      setError('Erro ao atualizar o usuario', err)
+    }
+  }
   if (loading) return <p>Carregando usuarios...</p>
   if (error) return <p>{error}</p>
 
@@ -32,13 +73,31 @@ function UsersList() {
       <Menu/>
       <div style={{padding:"2rem"}}>
         <h1>Lista de usuarios</h1>
-        <ol>
-          {users.map((item) => (
-            <li key={item.id}>
-              <strong>{item.name}</strong> - <i>{item.email}</i>
+        <ul>
+          {users.map((user) => (
+            <li key={user.id} style={{margin: "2rem"}}>
+              {editUserId === user.id ? (
+                <form onSubmit={handleUpdate} style={{display:"flex", flexDirection: "column", gap: "0.5rem"}}>
+                  <input type="text" name='name' value={editData.name} onChange={handlEditChange} required />
+                  <input type="email" name='email' value={editData.email} onChange={handlEditChange} required/>
+                  <input type="password" name='passaword' value={editData.password} onChange={handlEditChange} required/>
+                  <button>Salvar</button>
+                  <button type='button' onClick={() => setEditUserId(null)}>Cancelar</button>
+                </form>                
+              ) : (
+                <>
+                
+                <strong>{user.name}</strong> - <i>{user.email}</i>
+                <div style={{display: "inline-flex", gap: "0.5rem", marginLeft: '1rem'}}>
+                  <button onClick={() => handleEditClick(user)}>Editar</button>
+                  <button onClick={() => handleDelete(user.id)}>Deletar</button>
+                </div>
+                </>
+              )}
+              <strong>{user.name}</strong> - <i>{user.email}</i>
             </li>
           ))}
-        </ol>
+        </ul>
       </div>
     </section>
   )

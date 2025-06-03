@@ -10,6 +10,7 @@ function App() {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState('')
+  const [showPassword, setShowPassword] = useState()
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -45,7 +46,8 @@ function App() {
         <form onSubmit={handleLogin}>
           <h2>Login</h2>
           <input type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input type="password" placeholder='Senha' value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <input type={showPassword ? 'text' : 'password'} placeholder='Senha' value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <p style={{position: 'absolute', width: '20px', cursor: 'pointer'}}>👁</p>
           <button type='submit'>Entrar</button>
           <p className={style.userCad}>Entre em contato</p>
           <p>{message}</p>
